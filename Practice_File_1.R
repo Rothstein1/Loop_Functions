@@ -49,8 +49,58 @@ sapply(x,mean)
 #below does not work, this is why we need to use the loop functions to iterate over each element in the list 
 mean(b)
 
-## apply: Apply a function over the margins of an array 
+## apply: Apply a function over the margins(rows or columns) of an array (matrices)
+## 4 arguments: (1) an array X, (2) the margin (as an integer vector), indicating which margins should be retained
+## (3) the function, (4) other arguments that go together with the function
+
+## A matrix is simply a 2-dimensional array 
+## Example 1
+x<- matrix(rnorm(200), 20, 10)
+
+## (1)x is the array we want to iterate the function on, (2) we indicate the dimension we want to iterate the function over
+## When we call dim(x) we see row dimension =20 is listed first and then column dimension = 10 is listed second
+dim(x)
+## So 1= iterate the function over each row, & 2 = iterate the function over each column
+## In other words, the margin we indicate is the margin that remains (and the other margin is eliminated)
+
+## Below calculates mean across all 20 rows (returns answers for all 20 rows)
+apply(x,1,mean)
+
+## Below calculates mean across all 10 columns ( returns answers for all 10 columns)
+apply(x,2,mean)
+
+## R provides some functions to calcualte the sum/mean over the row/column of a matrix 
+## rowSums function = apply(x,1,sum)
+## rowMeans function = apply(x,1,mean)
+## colSums function = apply(x,2,sum)
+## colSums function = apply(x,2,mean)
+
+## Example 2
+## Below calculates the 25% and 75% percentile across each row 
+apply(x,1, quantile, probs =c(.25,.75))
+
+##Now let's look at 3-dimensional arrays 
+## Example 3 (10 2 X 2 matricies that are stacked)
+a <- array(rnorm(2 *2 * 10), c(2,2,10))
+dim(a)
+
+## Below will calculate average along each 2 X 2 position and will get rid of the third dimension 
+apply(a, c(1,2), mean)
+
+## Below will retain only the third dimension (10) and calculate average across all 10
+apply(a, 3, mean)
+
+## We can use the shortcut functions to arrays 
+## Below calculates mean across each row/column pair 
+rowMeans(a, dims=2)
+
+## Below calculates mean across each row 
+rowMeans(a, dims=1)
+
+
+## mapply: Multivariate version of lappy
+
 ## tapply: Apply a function over subsets of a vector
-## mapply: Multivariate version of lappy 
+ 
 ## split: splits object into sub pieces. Often used together with lapply and sapply 
 
