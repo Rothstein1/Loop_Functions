@@ -73,7 +73,7 @@ apply(x,2,mean)
 ## rowSums function = apply(x,1,sum)
 ## rowMeans function = apply(x,1,mean)
 ## colSums function = apply(x,2,sum)
-## colSums function = apply(x,2,mean)
+## colMeans function = apply(x,2,mean)
 
 ## Example 2
 ## Below calculates the 25% and 75% percentile across each row 
@@ -99,8 +99,113 @@ rowMeans(a, dims=1)
 
 
 ## mapply: Multivariate version of lappy
+## Applies a function in parallel over a set of arguments
+## mapply can take multiple lists as input arguments, and apply a function over those lists in parralel
+## Arguments: (1) function that we want to apply 
+
+## rep(x,y) function repeats x, y times 
+rep(1,4)
+
+## Example 1
+## Below applies rep function using 1:4 as x and 4:1 as y and returns a list
+## Same as list(rep(1,4), rep(2,3), rep(3,2), rep(4,1))
+z <- mapply(rep, 1:4, 4:1)
+
+## Example 2
+noise <- function(n,mean,sd){
+    rnorm(n,mean,sd)
+}
+## Below gives us 5 random variables with mean 1 and sd 2
+noise(5,1,2)
+
+# Function does not work when we provide a vector of arguments 
+## We want a list of 5 elements: (1)1 random normal variable with mean 1 and sd 2....... 
+##(5) 5 random normal variables with mean 5 and sd 2
+noise(1:5, 1:5,2)
+
+# We can do this using mapply 
+mapply(noise,1:5,1:5,2)
 
 ## tapply: Apply a function over subsets of a vector
- 
-## split: splits object into sub pieces. Often used together with lapply and sapply 
+## Arguments: (1) vector x, (2) Index is a factor or list of factors, (3) is the function to be applied 
+## Index vector is same length as x vector (index vector simply provides indices for vector x values (designiating which group each value belongs to))
 
+## example 1
+## Below creates a vector that contains (1) 10 normal variables, (2) 10 uniform variables, 
+## & (3) 10 normal variables with a mean of 1. This vector essenetially has 3 groups
+x<- c(rnorm(10), runif(10), rnorm(10,1))
+x
+
+## Below creates a factor variable that has 3 levels that are each repeated 10 times (10 1s, 10 2s, & 10 3s)
+f <- gl(3,10)
+f
+
+## Below calculates the mean across each subset of the vector x. 
+## Factor f states that the first 10 values are from level 1, the next 10 are level 2, and the last 10 are level 3
+## As such, tapply calculates mean across each of the 3 subsets 
+tapply(x,f,mean)
+
+## Calculate range
+tapply(x,f,range)
+
+# Below does the same but using g as the factor 
+g <- c("R1","R1","R1","R1","R1","R1","R1","R1","R1","R1","R2","R2","R2","R2","R2","R2","R2","R2","R2","R2",
+       "R3","R3","R3","R3","R3","R3","R3","R3","R3","R3")
+tapply(x,g,mean)
+tapply(x,g,range)
+
+## split: splits object into sub pieces. Often used together with lapply and sapply 
+## Not a loop function 
+## takes a vector or other objects and splits into groups determined by a factor or list of factors 
+## Similar to tapply but without applying a function 
+## Takes an object/vector x and splits into the number of groups that are identified in the factor
+## And then once we have those splitted groups --> we can use lappy or sapply to those individual groups
+
+## Example 1
+x<- c(rnorm(10), runif(10), rnorm(10,1))
+f <- gl(3,10)
+
+## Below splits x into each group as indicated by f 
+z <- split(x,f)
+
+## The below accomplish the same:
+lapply(split(x,f), mean)
+tapply(x,f,mean)
+
+## Example 2 using datasets package
+head(airquality)
+
+## Calculate the mean of each column in airquality within each month 
+## First we split the data into groups by month 
+s<- split(airquality, airquality$Month)
+
+## Then use lapply to calculate mean across columns for each month 
+lapply(s, colMeans)
+
+## We can use lapply together with an anonymous function to calculate monthly means over certain columns 
+lapply(s,function(x) colMeans(x[,c("Ozone", "Solar.R", "Wind")]))
+
+## We can also do this using sapply to simplify output as a matrix 
+sapply(s, colMeans)
+sapply(s,function(x) colMeans(x[,c("Ozone", "Solar.R", "Wind")]))
+
+## We can also add nm.rm=TRUE to remove NA's from calculation: 
+lapply(s, colMeans, na.rm = TRUE)
+sapply(s, colMeans, na.rm = TRUE)
+
+## Splitting on more than one level 
+x<- rnorm(10)
+x
+f1 <- gl(2,5) ## This could be female vs male
+f2 <- gl(5,2) ## And this could me age type (baby, teenanger, young adult, adult, elderly)
+f1
+f2
+## The below combines the two levels 
+interaction(f1,f2)
+
+## We have 10 levels. But there are some empty levels in the output.
+## When we use split function, the levels are automatically combined (we don't need to use interaction function)
+split(x, list(f1,f2))
+
+## We can drop empty levels using: 
+split(x, list(f1,f2), drop = TRUE)
